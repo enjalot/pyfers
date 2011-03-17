@@ -35,7 +35,7 @@ class Timing(object):
     def __str__(self):
         s = "Timings:\n"
         #print dir(self)
-        for key in self.timings.keys():
+        for key in sorted(self.timings.keys()):
             s += "%s | " % key 
             ts = self.timings[key]["timings"]
             count = self.timings[key]["count"]
