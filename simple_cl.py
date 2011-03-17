@@ -20,6 +20,12 @@ prg = cl.Program(ctx, """
     }
     """).build()
 
+@timing.timings("Add: PyOpenCL Kernel Execution")
+def add_core(queue, global_size, local_size, a_buf, b_buf, dest_buf):
+    prg.sum(queue, global_size, local_size, a_buf, b_buf, dest_buf)
+    queue.finish()
+
+
 @timing.timings("Add: PyOpenCL")
 def add(a, b):
     a_buf = cl.Buffer(ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=a)
@@ -28,7 +34,11 @@ def add(a, b):
     
     global_size = a.shape
     local_size = None
+
+    #execute the kernel before timing the kernel call, so that compiling isn't taken into account
     prg.sum(queue, global_size, local_size, a_buf, b_buf, dest_buf)
+    queue.finish()
+    add_core(queue, global_size, local_size, a_buf, b_buf, dest_buf)
     c = numpy.empty_like(a)
     cl.enqueue_read_buffer(queue, dest_buf, c).wait()
     return c
