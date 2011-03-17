@@ -1,4 +1,5 @@
-#example taken from http://documen.tician.de/pyopencl/
+#http://documen.tician.de/pyopencl/
+
 import pyopencl as cl
 import numpy
 import timing
@@ -33,6 +34,8 @@ def add(a, b):
     return c
 
 
+
+#this kernel matches our more complex cython example
 prg2 = cl.Program(ctx, """
     __kernel void complex(__global const float *a,
                       __global const float *b, 
