@@ -19,28 +19,38 @@ class Timing(object):
                 self.timings[name]["count"] = 1
                 self.timings[name]["total"] = t
 
-    def __call__(self, func):
+    def __call__(self, pretty_name=None):
         """Turn the object into a decorator"""
-        def wrapper(*arg, **kwargs):
-            t1 = time.time()                #start time
-            res = func(*arg, **kwargs)      #call the originating function
-            t2 = time.time()                #stop time
-            t = (t2-t1)*1000.0              #time in milliseconds
-            data = (func.__name__, t)
-            self.col.send(data)             #collect the data
-            return res 
-        return wrapper
+        def wrap(func):                         #the decorator
+            def wrapped(*args, **kwargs):
+                t1 = time.time()                #start time
+                res = func(*args, **kwargs)     #call the originating function
+                t2 = time.time()                #stop time
+                t = (t2-t1)*1000.0              #time in milliseconds
+
+                if pretty_name is not None:     #allow user to choose timer name
+                    name = pretty_name
+                else:
+                    name = func.__name__
+
+                data = (name, t)
+                self.col.send(data)             #collect the data
+                return res 
+            return wrapped
+        return wrap
 
 
     def __str__(self):
         s = "Timings:\n"
         #print dir(self)
-        for key in sorted(self.timings.keys()):
-            s += "%s | " % key 
-            ts = self.timings[key]["timings"]
-            count = self.timings[key]["count"]
-            total = self.timings[key]["total"]
-            s += "average: %s | total: %s | count: %s\n" % (total / count, total, count)
+        sk = sorted(self.timings.items(), key=lambda x : x[1]["total"])
+        #for key in sorted(self.timings.keys()):
+        for t in sk:
+            s += "%-20s | " % t[0] 
+            ts = t[1]["timings"]
+            count = t[1]["count"]
+            total = t[1]["total"]
+            s += "average: %.8f | total: %.8f | count: %d\n" % (total / count, total, count)
         return "%s" % s 
 
 timings = Timing()

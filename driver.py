@@ -8,7 +8,7 @@ import numpy
 import timing
 
 if __name__ == "__main__":
-    n = 100000
+    n = 10000000
 
     a = numpy.ones((n, ), dtype=numpy.float32)
     b = numpy.ones((n, ), dtype=numpy.float32)
@@ -16,10 +16,17 @@ if __name__ == "__main__":
     cpure = simple_pure.add(a, b)
     for i in range(10):
         cnp = simple_pure.add_np(a, b)
-        cyp1 = simple_cython.add_cy1(a, b)
-        cyp2 = simple_cython.add_cy2(a, b)
-        clp = simple_cl.add_cl(a, b)
-    #cyp = simple_cython.add2(a, b)
+        cyp = simple_cython.add(a, b)
+        clp = simple_cl.add(a, b)
 
+        ccy = simple_cython.complex(a, b)
+        ccl = simple_cl.complex(a, b)
+    #cyp = simple_cython.add2(a, b)
+    print numpy.linalg.norm(cnp - clp)
+    print numpy.linalg.norm(ccy - ccl)
+
+    #cyc = simple_cython.gradient
+
+    print "n = %d" % n
     print timing.timings
 
