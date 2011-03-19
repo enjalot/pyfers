@@ -3,6 +3,7 @@ import time
 class Timing(object):
     def __init__(self):
         self.timings = {}
+        self.manual = {}
         self.col = self.__collector()
         self.col.next()                 #coroutine syntax
 
@@ -43,7 +44,8 @@ class Timing(object):
         self.manual[name] = time.time()
 
     def stop(self, name):
-        t2 = self.manual[name]
+        t1 = self.manual[name]
+        t2 = time.time()
         t = (t2-t1)*1000.0
         self.col.send((name, t))
 

@@ -22,15 +22,6 @@ prg = cl.Program(ctx, """
     }
     """).build()
 
-@timing.timings("Add: PyOpenCL Kernel Execution")
-def add_core(queue, global_size, local_size, a_buf, b_buf, dest_buf):
-    evt = prg.sum(queue, global_size, local_size, a_buf, b_buf, dest_buf)
-    evt.wait()
-    elapsed = 1e-6*(evt.profile.end - evt.profile.start)
-    timing.timings.send("Add: PyOpenCL GPU timer 2", elapsed)
-
-    #queue.finish()
-
 
 @timing.timings("Add: PyOpenCL")
 def add(a, b):
@@ -43,11 +34,15 @@ def add(a, b):
 
     #execute the kernel before timing the kernel call, so that compiling isn't taken into account
     evt = prg.sum(queue, global_size, local_size, a_buf, b_buf, dest_buf)
-    #queue.finish()
+    queue.finish()
+
+
+    timing.timings.start("Add: PyOpenCL CPU timer")
+    evt = prg.sum(queue, global_size, local_size, a_buf, b_buf, dest_buf)
     evt.wait()
     elapsed = 1e-6*(evt.profile.end - evt.profile.start)
-    timing.timings.send("Add: PyOpenCL GPU timer 1", elapsed)
-    add_core(queue, global_size, local_size, a_buf, b_buf, dest_buf)
+    timing.timings.send("Add: PyOpenCL GPU timer", elapsed)
+    timing.timings.stop("Add: PyOpenCL CPU timer")
     c = numpy.empty_like(a)
     cl.enqueue_read_buffer(queue, dest_buf, c).wait()
     return c
