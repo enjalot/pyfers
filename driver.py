@@ -8,7 +8,7 @@ import numpy
 import timing
 
 if __name__ == "__main__":
-    n = 100000
+    n = 1000000
 
     a = numpy.ones((n, ), dtype=numpy.float32)
     b = numpy.ones((n, ), dtype=numpy.float32)

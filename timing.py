@@ -39,6 +39,18 @@ class Timing(object):
             return wrapped
         return wrap
 
+    def start(self, name):
+        self.manual[name] = time.time()
+
+    def stop(self, name):
+        t2 = self.manual[name]
+        t = (t2-t1)*1000.0
+        self.col.send((name, t))
+
+    #already have a timing and want to store it in this object
+    def send(self, name, t):
+        self.col.send((name, t))
+
 
     def __str__(self):
         s = "Timings:\n"
